@@ -31,3 +31,17 @@ Participate
 Were you able to exploit everything ? Did you get stuck ? Want more challenges ?
 
 Join in Twitter with #DamnVulnerableDeFi
+
+Solution : https://github.com/Amxx/damn-vulnerable-defi
+
+https://www.damnvulnerabledefi.xyz/
+
+    "test"
+    "unstoppable"
+    "truster"
+    "side-entrance"
+    "the-rewarder"
+    "naive-receiver"
+    "selfie"
+    "compromised"
+    "puppet"

@@ -28,15 +28,15 @@ contract UnstoppableLender is ReentrancyGuard {
 
     function flashLoan(uint256 borrowAmount) external nonReentrant {
         require(borrowAmount > 0, "Must borrow at least one token");
-
+        //Get balance before Flashloan.
         uint256 balanceBefore = damnValuableToken.balanceOf(address(this));
         require(balanceBefore >= borrowAmount, "Not enough tokens in pool");
 
-        // Ensured by the protocol via the `depositTokens` function
+        // Ensured by the protocol via the `depositTokens` function ######################################
         assert(poolBalance == balanceBefore);
-        
+        //Transfer amount to msg.sender
         damnValuableToken.transfer(msg.sender, borrowAmount);
-        
+        //msgsender is receiver ?
         IReceiver(msg.sender).receiveTokens(address(damnValuableToken), borrowAmount);
         
         uint256 balanceAfter = damnValuableToken.balanceOf(address(this));
