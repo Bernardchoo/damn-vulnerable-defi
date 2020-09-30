@@ -17,3 +17,17 @@ Share your solutions, comments, feedback and more in Twitter with [#DamnVulnerab
 All Solidity code, practices and patterns in this repository are DAMN VULNERABLE and for educational purposes only.
 
 DO NOT USE IN PRODUCTION.
+
+How to Hack
+Clone the repository
+Install dependencies with npm install
+Code your solutions in the provided *.challenge.js files (inside each challenge's folder in the test folder)
+Run your exploit for a challenge with npm run challenge-name. If the challenge is executed successfully, you've passed!
+Tips and tricks
+In all challenges you must use the attacker account. That means all your transactions must include {from: attacker}
+In some cases, you might need to use custom attacker contracts.
+To code the exploits, you might want to refer to the OpenZeppelin Test Helpers and Truffle Contracts docs
+Participate
+Were you able to exploit everything ? Did you get stuck ? Want more challenges ?
+
+Join in Twitter with #DamnVulnerableDeFi
