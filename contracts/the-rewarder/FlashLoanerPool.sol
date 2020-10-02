@@ -21,14 +21,15 @@ contract FlashLoanerPool is ReentrancyGuard {
         uint256 balanceBefore = liquidityToken.balanceOf(address(this));
         //Token balance must be more than or equal amount that user want to borrow.
         require(amount <= balanceBefore, "Not enough token balance");
-
+        // Call by Attacker
         require(msg.sender.isContract(), "Borrower must be a deployed contract");
-        //Transfer liquidity token to borrower.
+        //Transfer liquidity token to attacker contract.
         liquidityToken.transfer(msg.sender, amount);
 /*      TheRewarderPool(rewarder).liquidityToken().approve(rewarder, amount);
         TheRewarderPool(rewarder).deposit(amount);
         TheRewarderPool(rewarder).withdraw(amount);
         TheRewarderPool(rewarder).liquidityToken().transfer(msg.sender, amount);*/
+        // Call attacker function and execute -> 
         (bool success, ) = msg.sender.call(
             abi.encodeWithSignature(
                 "receiveFlashLoan(uint256)",

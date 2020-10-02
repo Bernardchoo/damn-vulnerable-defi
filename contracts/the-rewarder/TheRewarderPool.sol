@@ -57,7 +57,7 @@ contract TheRewarderPool {
 
     function distributeRewards() public returns (uint256) {
         uint256 rewardInWei = 0;
-
+        // Check if 5 days passed and take snapshot.
         if(isNewRewardsRound()) {
             _recordSnapshot();
         }        

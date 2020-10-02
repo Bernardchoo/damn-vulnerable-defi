@@ -36,12 +36,16 @@ Solution : https://github.com/Amxx/damn-vulnerable-defi
 
 https://www.damnvulnerabledefi.xyz/
 
-    "test"
-    "unstoppable"
-    "truster"
-    "side-entrance"
-    "the-rewarder"
-    "naive-receiver"
-    "selfie"
-    "compromised"
-    "puppet"
+    $ yarn unstoppable
+    $ yarn truster
+    $ yarn side-entrance
+    $ yarn the-rewarder // done
+    $ yarn naive-receiver
+    $ yarn selfie
+    $ yarn compromised
+    $ yarn puppet
+
+If error occurs : 
+Timeout of 5000ms exceeded. For async tests and hooks, ensure "done()" is called; if returning a Promise, ensure it resolves.
+
+Increase npx mocha --timeout 5000 (to 10000)

