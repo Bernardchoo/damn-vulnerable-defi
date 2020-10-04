@@ -30,7 +30,7 @@ contract Exchange is ReentrancyGuard {
         // Price should be in [wei / NFT]
         uint256 currentPriceInWei = oracle.getMedianPrice(token.symbol());
         require(amountPaidInWei >= currentPriceInWei, "Amount paid is not enough");
-
+        // return unique token ID.
         uint256 tokenId = token.mint(msg.sender);
         
         msg.sender.sendValue(amountPaidInWei - currentPriceInWei);

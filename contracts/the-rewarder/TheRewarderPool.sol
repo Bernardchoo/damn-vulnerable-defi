@@ -67,7 +67,7 @@ contract TheRewarderPool {
 
         if (totalDeposits > 0) {
             uint256 reward = (amountDeposited * 100) / totalDeposits;
-
+            //cannot retrieve if timestamp is lastcollectedStamp
             if(reward > 0 && !_hasRetrievedReward(msg.sender)) {                
                 rewardInWei = reward * 10 ** 18;
                 rewardToken.mint(msg.sender, rewardInWei);
@@ -83,9 +83,11 @@ contract TheRewarderPool {
         lastRecordedSnapshotTimestamp = block.timestamp;
         roundNumber++;
     }
-
+    // if time is between last collected and period period == collected.
     function _hasRetrievedReward(address account) private view returns (bool) {
         return (
+            //check account timestamp more than recorded timestamp
+            //check account timestamp less than recorded timestamp 
             lastRewardTimestamps[account] >= lastRecordedSnapshotTimestamp &&
             lastRewardTimestamps[account] <= lastRecordedSnapshotTimestamp + REWARDS_ROUND_MIN_DURATION
         );

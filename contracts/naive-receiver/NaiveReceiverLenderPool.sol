@@ -3,7 +3,7 @@ pragma solidity ^0.6.0;
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
-
+// Has 1000 ETH
 contract NaiveReceiverLenderPool is ReentrancyGuard {
     using SafeMath for uint256;
     using Address for address;
@@ -29,7 +29,7 @@ contract NaiveReceiverLenderPool is ReentrancyGuard {
             )
         );
         require(success, "External call failed");
-        
+        // Balance needs to include Fees.
         require(
             address(this).balance >= balanceBefore.add(FIXED_FEE),
             "Flash loan hasn't been paid back"

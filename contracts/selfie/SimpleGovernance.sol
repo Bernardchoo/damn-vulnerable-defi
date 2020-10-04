@@ -20,7 +20,7 @@ contract SimpleGovernance {
 
     event ActionQueued(uint256 actionId, address indexed caller);
     event ActionExecuted(uint256 actionId, address indexed caller);
-
+    // Set valuable token as governance token
     constructor(address governanceTokenAddress) public {
         require(governanceTokenAddress != address(0), "Governance token cannot be zero address");
         governanceToken = DamnValuableTokenSnapshot(governanceTokenAddress);
@@ -70,6 +70,7 @@ contract SimpleGovernance {
      * 2) enough time has passed since it was first proposed
      */
     function _canBeExecuted(uint256 actionId) private view returns (bool) {
+        //check if haven't executed yet and current time is more than proposed time + delayed time. 
         GovernanceAction memory actionToExecute = actions[actionId];
         return (
             actionToExecute.executedAt == 0 &&

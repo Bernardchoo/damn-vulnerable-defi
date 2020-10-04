@@ -2,7 +2,7 @@ pragma solidity ^0.6.0;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-
+// Has 10 ETH
 contract FlashLoanReceiver {
     using SafeMath for uint256;
     using Address for address payable;
@@ -16,7 +16,7 @@ contract FlashLoanReceiver {
     // Function called by the pool during flash loan
     function receiveEther(uint256 fee) public payable {
         require(msg.sender == pool, "Sender must be pool");
-
+        // Drain receiver by keep adding and transfering ETH to the pool.
         uint256 amountToBeRepaid = msg.value.add(fee);
 
         require(address(this).balance >= amountToBeRepaid, "Cannot borrow that much");
